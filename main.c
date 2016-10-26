@@ -25,6 +25,8 @@
 /******************************************************************************/
 
 /* i.e. uint8_t <variable_name>; */
+extern unsigned char master = 1;
+extern unsigned char canSend = 0;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -35,6 +37,7 @@ void buffer1_write();
 void reset_counter();
 void buffer1_read();
 void test_shift_register();
+void test_spi();
 unsigned char spi_Send_Read(unsigned char byte);
 unsigned char PORTA_shadow;
 unsigned char PORTB_shadow;
@@ -42,6 +45,9 @@ unsigned char PORTC_shadow;
 
 void main(void)
 {
+    master = 1;
+    canSend = 0;
+    
     TRISB = 0;
     TRISC = 0;
     TRISA = 0;
@@ -80,9 +86,17 @@ void main(void)
     /* Define TCBs */
     TCB SpiComsTCB;
     TCB* TCBPtr;            /*ptr to active TCB */
+    
+    /* Define data variables */
+    uint16_t writeSize = 0;
+    unsigned char *spiWriteData = 0;    /* Holds data to be written to SPI */
+    uint8_t spiReadData = 0;       /* Holds command from surface ship */
+    
+    /* Populate data structs */
+    SpiCommsData spiCommsData = {writeSize, &spiWriteData, &spiReadData};
 
     /* Populate TCBs */
-    SpiComsTCB.taskDataPtr = (void*)&SpiCommsData;
+    SpiComsTCB.taskDataPtr = (void*)&spiCommsData;
     SpiComsTCB.taskPtr = SpiComms;
     SpiComsTCB.next = NULL;
     SpiComsTCB.prev = NULL;
@@ -140,7 +154,6 @@ void main(void)
 //    }
 
 
-    return EXIT_SUCCESS;
 }
 
 void delay(int s) {
@@ -215,14 +228,6 @@ void buffer1_write() {
 	return;
 }
 
-unsigned char spi_Send_Read(unsigned char byte) {
-    SSPBUF = byte;
-    while (!DataRdySpi()) {
-        ;
-    }
-    return SSPBUF;
-}
-
 void test_shift_register() {
     // PORTA:
     // clk = a5
@@ -267,6 +272,8 @@ void test_shift_register() {
 }
 
 void test_spi() {
+    unsigned char status = 0;
+    unsigned char data[6];
     //write TX_ADDRESS register
     SPI_CSN = 0;            //CSN low
     spi_Send_Read(0x30);

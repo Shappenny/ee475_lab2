@@ -85,6 +85,6 @@ typedef struct ReadSramData
 typedef struct SpiCommsData
 {
 	uint16_t writeSize;		/* number of bytes to write */
-	uintptr_t writeData;	/* ptr to write_data */
-	uintptr_t readData;		/* ptr to read_data */
+	void** writeData;	/* ptr to write_data */
+	void* readData;		/* ptr to read_data */
 } SpiCommsData;

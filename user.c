@@ -24,6 +24,9 @@
 /******************************************************************************/
 
 /* <Initialize variables in user.h and insert code for user algorithms.> */
+extern unsigned char master;
+extern unsigned char canSend;
+
 
 void InitApp(void)
 {
@@ -55,7 +58,7 @@ void ReadSram(void *taskDataPtr)
 
 void SpiComms(void *taskDataPtr)
 {
-	SpiCommsData data = (SpiCommsData)(*taskDataPtr);
+	SpiCommsData *data = (SpiCommsData*) taskDataPtr;
 	// Check if we are the master
 	if (master)
 	{
@@ -65,9 +68,9 @@ void SpiComms(void *taskDataPtr)
 			// Send synch sequence
 			SpiWrite(SYNC_SEQ);
 			// Send data in 1 byte packets
-			for (int i = 0; i < data.writeSize; ++i)
+			for (uint16_t i = 0; i < data->writeSize; ++i)
 			{
-				SpiWrite((data.writeData >> (8*i)) & 0xFF);
+				SpiWrite((*((unsigned char *) data->writeData) >> (8*i)) & 0xFF);
 			}
 		}
 	} else	// slave
