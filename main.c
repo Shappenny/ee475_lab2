@@ -33,7 +33,7 @@ void delay(int s);
 void buffer1_write();
 void reset_counter();
 void buffer1_read();
-
+void test_shift_register();
 unsigned char PORTA_shadow;
 unsigned char PORTB_shadow;
 unsigned char PORTC_shadow;
@@ -51,36 +51,40 @@ void main(void)
     PORTB = PORTB_shadow;
     PORTC = PORTC_shadow;
 
-    reset_counter();
-    buffer1_write();
-    int i = 0;
-    while(1)
-    {
-        PORTA_shadow = PORTA_shadow ^ 1;
-        PORTA = PORTA_shadow;
-        delay(1000);
-        PORTA_shadow = PORTA_shadow ^ 1;
-        PORTA = PORTA_shadow;
-        delay(1000);
-        printf("hi\n");
+    PORTA = 0xFF;
+
+    test_shift_register();
+//    reset_counter();
+//    buffer1_write();
+//    int i = 0;
+//    while(1)
+//    {
+//        PORTA_shadow = PORTA_shadow ^ 1;
+//        PORTA = PORTA_shadow;
+//        delay(1000);
+//        PORTA_shadow = PORTA_shadow ^ 1;
+//        PORTA = PORTA_shadow;
+//        delay(1000);
 //        
-//        delay(10000);
-//        PORTB = PORTB & ~0x10;
-//        delay(10000);
 //        
-//        PORTA = i;
-//        //buffer1_write();
-        i++;
-        if (i == 1000) {
-            reset_counter();
-            buffer1_read();
-        }
-        if (i == 2000) {
-            reset_counter();
-            buffer1_write();
-            i = 0;
-        }
-    }
+////        
+////        delay(10000);
+////        PORTB = PORTB & ~0x10;
+////        delay(10000);
+////        
+////        PORTA = i;
+////        //buffer1_write();
+//        i++;
+//        if (i == 1000) {
+//            reset_counter();
+//            buffer1_read();
+//        }
+//        if (i == 2000) {
+//            reset_counter();
+//            buffer1_write();
+//            i = 0;
+//        }
+//    }
 
 }
 
@@ -136,6 +140,52 @@ void buffer1_write() {
     PORTA = PORTA_shadow;
 	return;
 }
+
+
+void test_shift_register() {
+    // PORTA:
+    // clk = a5
+    // data = a6
+    // clear = a7
+    
+    // clear register
+    PORTC_shadow = PORTC_shadow & ~(1 << 7);
+    PORTC = PORTC_shadow;
+    delay(100);
+    PORTC_shadow = PORTC_shadow | (1 << 7);
+    PORTC = PORTC_shadow;
+    delay(100);
+    
+    
+    while(1) {
+        // set data = 1
+        PORTC_shadow = PORTC_shadow | (1 << 6);
+        PORTC = PORTC_shadow;
+        // Clock cycle
+        PORTC_shadow = PORTC_shadow | (1 << 5);
+        PORTC = PORTC_shadow;
+        delay(1000);
+        PORTC_shadow = PORTC_shadow & ~(1 << 5);
+        PORTC = PORTC_shadow;
+        delay(1000);
+        
+        // set data  = 0
+        PORTC_shadow = PORTC_shadow & ~(1 << 6);
+        PORTC = PORTC_shadow;
+        // Clock cycle
+        PORTC_shadow = PORTC_shadow | (1 << 5);
+        PORTC = PORTC_shadow;
+        delay(1000);
+        PORTC_shadow = PORTC_shadow & ~(1 << 5);
+        PORTC = PORTC_shadow;
+        delay(1000);
+        
+    }
+    return;
+    
+}
+
+
 //
 //void buffer2_write() {
 //
