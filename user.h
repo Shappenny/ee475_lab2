@@ -61,7 +61,10 @@ unsigned char spi_Send_Read(unsigned char byte);
 //  Declare a TCB structure
 typedef struct 
 {
-	void (*taskPtr)(void *);
+	void* taskDataPtr; 		  	/* ptr to generic data */
+	void (*taskPtr)(void*);    	/* ptr to generic function */
+	struct TCB* next;
+	struct TCB* prev;
 }
 TCB;
 
