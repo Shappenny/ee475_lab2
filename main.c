@@ -30,10 +30,12 @@
 /* Main Program                                                               */
 /******************************************************************************/
 void delay(int s);
+void insertTask(TCB* node, TCB** head, TCB** tail);
 void buffer1_write();
 void reset_counter();
 void buffer1_read();
 void test_shift_register();
+unsigned char spi_Send_Read(unsigned char byte);
 unsigned char PORTA_shadow;
 unsigned char PORTB_shadow;
 unsigned char PORTC_shadow;
@@ -53,7 +55,53 @@ void main(void)
 
     PORTA = 0xFF;
 
+    OpenSPI(SPI_FOSC_16, MODE_00, SMPMID); //open SPI1
+    PORTA = 0x00;
+    ADCON1 = 0x0F;        // set up PORTA to be digital I/Os
+    TRISA = 0x02;        // PORTA<7.2,0> outputs PORTA<1> input
+    TRISCbits.TRISC3 = 0;    // SDO output
+    TRISCbits.TRISC5 = 0;   // SCK output
+    TRISCbits.TRISC2 = 0;    // CSN output
+    TRISCbits.TRISC1 = 0;    // CE output
+    SPI_CSN = 1;        // CSN high
+    SPI_SCK = 0;        // SCK low
+    SPI_CE  = 0;        // CE low
+    nop();
+
     test_shift_register();
+
+    test_spi();
+
+    /* Define TCBs */
+    TCB SpiComsTCB;
+    TCB* TCBPtr;            /*ptr to active TCB */
+
+    /* Populate TCBs */
+    SpiComsTCB.taskDataPtr = (void*)&SpiCommsData;
+    SpiComsTCB.taskPtr = SpiComms;
+    SpiComsTCB.next = NULL;
+    SpiComsTCB.prev = NULL;
+
+    /* Set up task queue */
+    TCB* taskQueueHead = NULL;
+    TCB* taskQueueTail = NULL;
+
+    insertTask(&SpiComsTCB, &taskQueueHead, &taskQueueTail);
+
+    /* Run... forever!!! */
+    while(1)
+    {
+        // Get pointer to first task
+        TCBPtr = taskQueueHead;
+        
+        // Loop through task queue & perform each task
+        while (TCBPtr != NULL)
+        {
+            TCBPtr->taskPtr( (TCBPtr->taskDataPtr) );
+            TCBPtr = TCBPtr->next;
+        }
+    }
+
 //    reset_counter();
 //    buffer1_write();
 //    int i = 0;
@@ -86,6 +134,8 @@ void main(void)
 //        }
 //    }
 
+
+    return EXIT_SUCCESS;
 }
 
 void delay(int s) {
@@ -94,6 +144,25 @@ void delay(int s) {
     for (i = 0; i < s; i++) {
         a++;
     }
+}
+
+void insertTask(TCB* node, TCB** head, TCB** tail)
+{
+    if(NULL == (*head)) // If the head pointer is pointing to nothing
+    {
+        *head = node; // set the head and tail pointers to point to this node
+        *tail = node;
+    }
+    else // otherwise, head is not NULL, add the node to the end of the list
+    {
+        (*tail)->next = node;
+        node->prev = *tail; // note that the tail pointer is still pointing
+                            // to the prior last node at this point
+        *tail = node;       // update the tail pointer
+    }
+    // Always set node next pointer to null for end of list
+    node->next = NULL;
+    return;
 }
 
 void reset_counter() {
@@ -141,6 +210,13 @@ void buffer1_write() {
 	return;
 }
 
+unsigned char spi_Send_Read(unsigned char byte) {
+    SSPBUF = byte;
+    while (!DataRdySpi()) {
+        ;
+    }
+    return SSPBUF;
+}
 
 void test_shift_register() {
     // PORTA:
@@ -183,6 +259,30 @@ void test_shift_register() {
     }
     return;
     
+}
+
+void test_spi() {
+    //write TX_ADDRESS register
+    SPI_CSN = 0;            //CSN low
+    spi_Send_Read(0x30);
+    spi_Send_Read(0x11);
+    spi_Send_Read(0x22);
+    spi_Send_Read(0x33);
+    spi_Send_Read(0x44);
+    spi_Send_Read(0x55);
+    SPI_CSN = 1;            //CSN high
+ 
+ 
+    //read TX_ADDRESS register
+    //Check that values are correct using the MPLAB debugger
+    SPI_CSN = 0;                      //CSN low
+    status = spi_Send_Read(0x10);
+    data[0] = spi_Send_Read(0x00);    // 0x11
+    data[1] = spi_Send_Read(0x00);    // 0x22
+    data[2] = spi_Send_Read(0x00);    // 0x33
+    data[3] = spi_Send_Read(0x00);    // 0x44
+    data[4] = spi_Send_Read(0x00);    // 0x55
+    SPI_CSN = 1;                      // CSN high
 }
 
 
