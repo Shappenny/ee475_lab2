@@ -17,6 +17,7 @@
 
 #endif
 
+#include <spi.h>           /* For SPI comms */
 #include "user.h"
 
 /******************************************************************************/
@@ -38,3 +39,61 @@ void InitApp(void)
     /* Enable interrupts */
 }
 
+void CollectData(void *taskDataPtr)
+{
+
+}
+
+void WriteSram(void *taskDataPtr)
+{
+
+}
+
+void ReadSram(void *taskDataPtr)
+{
+
+}
+
+void SpiComms(void *taskDataPtr)
+{
+	SpiCommsData data = (SpiCommsData)(*taskDataPtr);
+	// Check if we are the master
+	if (master)
+	{
+		// Check if we have permission to send
+		if (canSend)
+		{
+			// Send synch sequence
+			SpiWrite(SYNC_SEQ);
+			// Send data in 1 byte packets
+			for (int i = 0; i < data.writeSize; ++i)
+			{
+				SpiWrite((data.writeData >> (8*i)) & 0xFF);
+			}
+		}
+	} else	// slave
+	{
+
+	}
+}
+
+unsigned char SpiRead(void)
+{
+	/* Read a byte, send dummy byte */
+    return spi_Send_Read(0x00);
+
+}
+
+void SpiWrite(unsigned char byte)
+{
+	/* Send a byte, ignore read value */
+	spi_Send_Read(byte);
+}
+
+unsigned char spi_Send_Read(unsigned char byte)
+{
+    SSPBUF = byte;
+    while (!DataRdySpi())
+        ;
+    return SSPBUF;
+}
