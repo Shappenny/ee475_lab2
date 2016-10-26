@@ -2,6 +2,10 @@
 /* User Level #define Macros                                                  */
 /******************************************************************************/
 
+/* General */
+#define nop() 		_asm nop _endasm	/* no-op */
+#define NULL		0x00
+/* SPI */
 #define SPI_SCK		LATCbits.LATC3		/* Clock pin, PORTC pin 3 */
 #define SPI_SO		LATCbits.LATC5		/* Serial output pin, PORTC pin 5 */
 #define SPI_SI		PORTCbits.RC4		/* Serial input pin, PORTC pin 4 */
@@ -9,8 +13,32 @@
 #define SPI_CE		LATCbits.LATC1		/* CE output pin, PORTC pin 1 */
 #define SPI_IRQ		PORTBbits.RB0		/* IRQ input pin, PORTB pin 0 */
 #define SPI_SCALE	4					/* postscaling of signal */
-#define nop() 		_asm nop _endasm	/* no-op */
 #define SYNC_SEQ	0x2C8				/* SPI synchronize sequence sent before data */
+
+// MSSP1: SPI1 (MCP923S17 + LCD / Serial EEPROM ) 
+ #define    SPI1_TRIS    TRISCbits 
+ #define    SPI1_CLK    RC3     
+ #define    SPI1_SDI    RC4 
+ #define    SPI1_SDO    RC5 
+ 
+ // INIT I/O for MSSP1 SPI bus, includes I/O for attached devices 
+ #define    INIT_SPI1_IO()    {SPI_SCK=0; SPI_SO=0; SPI_SI=1;} 
+ 
+ // ------------------ 
+ // SPI Configuration 
+ // ------------------ 
+ 
+ // MSSP1: SPI1 Config and control 
+ #define    SPI1_CONFIG            0b00000010    // Master, Clock = FOSC/64, Disabled 
+ #define    SPI1_Enable()       {SSP1CON1bits.SSPEN=1;} 
+ #define    SPI1_Disable()		{SSP1CON1bits.SSPEN=0;} 
+ // SPI1 interrupt control 
+ #define SPI1_IntEnable()		{PIR1bits.SSP1IF = 0; PIE1bits.SSP1IE=1; INTCONbits.PEIE = 1;} 
+ #define SPI1_IntDisable()    	{PIE1bits.SSP1IE=0;} 
+ 
+ // Init MSSP1 in SPI mode and I/O pins 
+ #define    SPI1_Init()            {INIT_SPI1_IO(); SSP1CON1 = SPI1_CONFIG; SSP1STATbits.CKE=1; PIR1bits.SSP1IF=0;} 
+
 
 /* TODO Application specific user parameters used in user.c may go here */
 
