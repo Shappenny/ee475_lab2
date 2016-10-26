@@ -29,9 +29,9 @@
 [v _low_isr low_isr `IIL(v  1 e 1 0 ]
 "41 C:\Users\ee475\MPLABXProjects\pic18_c_template_1.X\main.c
 [v _main main `(v  1 e 1 0 ]
-"91
+"100
 [v _delay delay `(v  1 e 1 0 ]
-"145
+"154
 [v _test_shift_register test_shift_register `(v  1 e 1 0 ]
 "6266 C:\Program Files (x86)\Microchip\xc8\v1.38\include\pic18f25k22.h
 [v _PORTA PORTA `VEuc  1 e 1 @3968 ]
@@ -54,23 +54,23 @@
 "41
 [v _main main `(v  1 e 1 0 ]
 {
-"89
+"98
 } 0
-"145
+"154
 [v _test_shift_register test_shift_register `(v  1 e 1 0 ]
 {
-"186
+"195
 } 0
-"91
+"100
 [v _delay delay `(v  1 e 1 0 ]
 {
-"93
+"102
 [v delay@i i `i  1 a 2 36 ]
-"92
+"101
 [v delay@a a `i  1 a 2 34 ]
-"91
+"100
 [v delay@s s `i  1 p 2 31 ]
-"97
+"106
 } 0
 "67 C:\Users\ee475\MPLABXProjects\pic18_c_template_1.X\interrupts.c
 [v _low_isr low_isr `IIL(v  1 e 1 0 ]

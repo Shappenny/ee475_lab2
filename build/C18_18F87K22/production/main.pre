@@ -8916,9 +8916,18 @@ PORTC = PORTC_shadow;
 
 PORTA = 0xFF;
 
+while(1) {
+PORTA = 0xFF;
+delay(1000);
+PORTA= 0x00;
+delay(1000);
+}
+
+
+
 test_shift_register();
 
-# 89
+# 98
 }
 
 void delay(int s) {
@@ -8941,7 +8950,7 @@ delay(10000);
 
 void buffer1_write() {
 
-# 129
+# 138
 PORTA_shadow = PORTA_shadow & ~(1 << 2);
 
 
@@ -8960,7 +8969,7 @@ return;
 
 void test_shift_register() {
 
-# 152
+# 161
 PORTC_shadow = PORTC_shadow & ~(1 << 7);
 PORTC = PORTC_shadow;
 delay(100);
@@ -8997,10 +9006,10 @@ return;
 
 }
 
-# 199
+# 208
 void buffer1_read() {
 
-# 217
+# 226
 PORTA_shadow = PORTA_shadow | (1 << 2);
 
 

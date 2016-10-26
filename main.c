@@ -52,7 +52,16 @@ void main(void)
     PORTC = PORTC_shadow;
 
     PORTA = 0xFF;
-
+    
+    while(1) {
+        PORTA = 0xFF;
+        delay(1000);
+        PORTA= 0x00;
+        delay(1000);
+    }
+    
+    
+    
     test_shift_register();
 //    reset_counter();
 //    buffer1_write();
