@@ -29,7 +29,7 @@
  // ------------------ 
  
  // MSSP1: SPI1 Config and control 
- #define    SPI1_CONFIG            0b00000010    // Master, Clock = FOSC/64, Disabled 
+ #define    SPI1_CONFIG         0b00000010    // Master, Clock = FOSC/64, Disabled 
  #define    SPI1_Enable()       {SSP1CON1bits.SSPEN=1;} 
  #define    SPI1_Disable()		{SSP1CON1bits.SSPEN=0;} 
  // SPI1 interrupt control 

@@ -57,11 +57,13 @@ void main(void)
 
 
 
-    OpenSPI(SPI_FOSC_16, MODE_00, SMPMID); //open SPI1
+    //OpenSPI(SPI_FOSC_16, MODE_00, SMPMID); //open SPI1
     PORTA = 0x00;
     ADCON1 = 0x0F;        // set up PORTA to be digital I/Os
     TRISA = 0x02;        // PORTA<7.2,0> outputs PORTA<1> input
-    TRISCbits.TRISC3 = 0;    // SDO output
+    SPI1_Init();
+    SPI1_Enable();
+/*    TRISCbits.TRISC3 = 0;    // SDO output
     TRISCbits.TRISC5 = 0;   // SCK output
     TRISCbits.TRISC2 = 0;    // CSN output
     TRISCbits.TRISC1 = 0;    // CE output
@@ -69,6 +71,7 @@ void main(void)
     SPI_SCK = 0;        // SCK low
     SPI_CE  = 0;        // CE low
     nop();
+ */
 
    // test_shift_register();
 
