@@ -1,125 +1,3 @@
-//
-// /*
-// ** test.c
-// ** SPI test program for PIC18F4520 and nRF24L01 or nRF24L01+
-// ** Checks SPI comms between PIC and wireless chip
-// ** 
-// ** RA0    LED (output)
-// ** RA1    PB (input)
-// */
-// #if defined(__XC)
-//    #include <xc.h>        /* XC8 General Include File */
-//#elif defined(HI_TECH_C)
-//    #include <htc.h>       /* HiTech General Include File */
-//#elif defined(__18CXX)
-//    #include <p18cxxx.h>   /* C18 General Include File */
-//#endif
-//
-//#if defined(__XC) || defined(HI_TECH_C)
-//
-//#include <stdint.h>        /* For uint8_t definition */
-//#include <stdbool.h>       /* For true/false definition */
-//
-//#endif
-//
-//#include "system.h"        /* System funct/params, like osc/peripheral config */
-//#include "user.h"          /* User funct/params, such as InitApp */
-//#include "spi.h"
-//#include "C:/MCC18/h/pconfig.h"
-// //#include <p18f4520.h>
-// 
-// //function prototypes
-// unsigned char spi_Send_Read(unsigned char);
-// void dly(void);
-// 
-// // Defines
-// #define SPI_SCK        LATCbits.LATC3        // Clock pin, PORTC pin 3 
-// #define SPI_SO        LATCbits.LATC5        // Serial output pin, PORTC pin 5 
-// #define SPI_SI        PORTCbits.RC4        // Serial input pin, PORTC pin 4 
-// #define SPI_CSN        LATCbits.LATC2        // CSN output pin, PORTC pin 2
-// #define SPI_CE        LATCbits.LATC1        // CE output pin, PORTC pin 1
-// #define SPI_IRQ        PORTBbits.RB0        // IRQ input pin, PORTB pin 0
-// #define SPI_SCALE    4                      // postscaling of signal 
-// #define LED            LATAbits.LATA0
-// #define PB            PORTAbits.RA1
-// 
-// 
-// // Macros
-// #define nop() _asm nop _endasm
-// 
-// void main(void)
-// {
-//     unsigned char status = 0;
-//     unsigned char data[5];
-//     int i;
-// 
-//     // run internal oscillator at 8 MHz
-//     OSCCON = OSCCON | 0b01110000;
-//     while (!OSCCONbits.IOFS)    // wait for IOFS to go high
-//         ;
-// 
-//     OpenSPI(SPI_FOSC_16, MODE_00, SMPMID); //open SPI1
-//     PORTA = 0x00;
-//     ADCON1 = 0x0F;        // set up PORTA to be digital I/Os
-//     TRISA = 0x02;        // PORTA<7.2,0> outputs PORTA<1> input
-//     TRISCbits.TRISC3 = 0;    // SDO output
-//     TRISCbits.TRISC5 = 0;   // SCK output
-//     TRISCbits.TRISC2 = 0;    // CSN output
-//     TRISCbits.TRISC1 = 0;    // CE output
-//     SPI_CSN = 1;        // CSN high
-//     SPI_SCK = 0;        // SCK low
-//     SPI_CE    = 0;        // CE low
-//     //nop();
-// 
-//     //write TX_ADDRESS register
-//     SPI_CSN = 0;            //CSN low
-//     spi_Send_Read(0x30);
-//     spi_Send_Read(0x11);
-//     spi_Send_Read(0x22);
-//     spi_Send_Read(0x33);
-//     spi_Send_Read(0x44);
-//     spi_Send_Read(0x55);
-//     SPI_CSN = 1;            //CSN high
-// 
-// 
-//     //read TX_ADDRESS register
-//     //Check that values are correct using the MPLAB debugger
-//     SPI_CSN = 0;            //CSN low
-//     status = spi_Send_Read(0x10);
-//     data[0] = spi_Send_Read(0x00);    // 0x11
-//     data[1] = spi_Send_Read(0x00);    // 0x22
-//     data[2] = spi_Send_Read(0x00);    // 0x33
-//     data[3] = spi_Send_Read(0x00);    // 0x44
-//     data[4] = spi_Send_Read(0x00);    // 0x55
-//     SPI_CSN = 1;                    // CSN high
-// 
-//     while (1)
-//     {
-//         LED = 1;
-//         dly();
-//         LED = 0;
-//         dly();
-//     }
-// }
-// 
-// 
-// unsigned char spi_Send_Read(unsigned char byte)
-// {
-//     SSPBUF = byte;    
-//     while(!DataRdySPI())
-//         ;    
-//     return SSPBUF;
-// }
-// 
-// void dly(void)
-// {
-//     unsigned int i;
-// 
-//     for (i = 0; i < 50000; i++)
-//         ;
-// }    
-
- 
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -142,8 +20,8 @@
 #include <stdio.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
-//#include "spi.h"
-//#include "C:/MCC18/h/pconfig.h"
+
+
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
@@ -200,30 +78,6 @@ void main(void)
     SPI1_Init();
     SPI1_Enable();
     
-    
-
-    //
-//
-//    //OpenSPI(SPI_FOSC_16, MODE_00, SMPMID); //open SPI1
-//    PORTA = 0x00;
-//    ADCON1 = 0x0F;        // set up PORTA to be digital I/Os
-//    TRISA = 0x02;        // PORTA<7.2,0> outputs PORTA<1> input
-//    SPI1_Init();
-//    SPI1_Enable();
-///*    TRISCbits.TRISC3 = 0;    // SDO output
-//    TRISCbits.TRISC5 = 0;   // SCK output
-//    TRISCbits.TRISC2 = 0;    // CSN output
-//    TRISCbits.TRISC1 = 0;    // CE output
-//    SPI_CSN = 1;        // CSN high
-//    SPI_SCK = 0;        // SCK low
-//    SPI_CE  = 0;        // CE low
-//    nop();
-// */
-//
-//   // test_shift_register();
-//
-//    test_spi();
-//
 //    /* Define TCBs */
 //    TCB SpiComsTCB;
 //    TCB* TCBPtr;            /*ptr to active TCB */
@@ -258,7 +112,6 @@ void main(void)
     sram_write(0x44, 0x01);
     sram_write(0xad, 0x02);
 
-
     sram_read(0x00);
     sram_read(0x01);
     int data = sram_read(0x02);
@@ -266,57 +119,50 @@ void main(void)
        
     while(1)
     {
-//        int a = sample_adc(11);
-//        sram_write(a)
-//        SPI_CSN = 0;
-//        spi_Send_Read(a);
-//        SPI_CSN = 1;
-//        delay(10000);
-        
-    for (int i = 0; i < 1024; i++) {
-        int a = sample_adc(11);
-        sram_write(a, i * activeBufferId);
-        // Buffer 80% full; request upload
-        if (i == 820) 
-        {
-            // Ask permission from surface
-            SPI_CSN = 0;
-            spi_Send_Read(UPLOAD_REQ0);
-            spi_Send_Read(UPLOAD_REQ1);
-            SPI_CSN = 1;
-            // Wait for response
-            delay(100);
-            SPI_CSN = 0;
-            unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
-            unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
-            SPI_CSN = 1;
-            canSend = (ack0 == UPLOAD_REQ0) && (ack1 == UPLOAD_ACK1);
-        // Buffer 90% full; start collection on second buffer
-        } else if (i == 922) 
-        {
-            // Switch buffer
-            activeBufferId = (activeBufferId == 2) ? 1 : 2;
-        }
-        
-    }
-    
-    // Upload to surface ship, if we have permission
-    if (canSend)
-    {
-        // Send synchronization sequence
-        SPI_CSN = 0;
-        spi_Send_Read(SYNC_SEQ >> 8);
-        spi_Send_Read(SYNC_SEQ);
-        SPI_CSN = 1;
         for (int i = 0; i < 1024; i++) {
-            int data = sram_read(i);
-            delay(100);
-            SPI_CSN = 0;
-            spi_Send_Read(data);
-            SPI_CSN = 1;
-            //delay(1000);
+            int a = sample_adc(11);
+            sram_write(a, i * activeBufferId);
+            // Buffer 80% full; request upload
+            if (i == 820) 
+            {
+                // Ask permission from surface
+                SPI_CSN = 0;
+                spi_Send_Read(UPLOAD_REQ0);
+                spi_Send_Read(UPLOAD_REQ1);
+                SPI_CSN = 1;
+                // Wait for response
+                delay(100);
+                SPI_CSN = 0;
+                unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
+                unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+                SPI_CSN = 1;
+                canSend = (ack0 == UPLOAD_REQ0) && (ack1 == UPLOAD_ACK1);
+            // Buffer 90% full; start collection on second buffer
+            } else if (i == 922) 
+            {
+                // Switch buffer
+                activeBufferId = (activeBufferId == 2) ? 1 : 2;
+            }
+            
         }
-    }
+        
+        // Upload to surface ship, if we have permission
+        if (canSend)
+        {
+            // Send synchronization sequence
+            SPI_CSN = 0;
+            spi_Send_Read(SYNC_SEQ >> 8);
+            spi_Send_Read(SYNC_SEQ);
+            SPI_CSN = 1;
+            for (int i = 0; i < 1024; i++) {
+                int data = sram_read(i);
+                delay(100);
+                SPI_CSN = 0;
+                spi_Send_Read(data);
+                SPI_CSN = 1;
+                //delay(1000);
+            }
+        }
         
         //test_spi();
         //delay(10000);
@@ -401,14 +247,13 @@ void ADC_init()
     ADFM = 1;
 }
 
-
 int sample_adc(unsigned char channel) {
-    //ADCON0 &= 0x81;              //Clearing channel selection bits
-    //ADCON0 |= channel << 3;        //Setting channel selection bits
-    delay(2000);             //Acquisition time to charge hold capacitor
-    GO_nDONE = 1;                //Initializes A/D conversion
-    while(GO_nDONE);             //Waiting for conversion to complete
-    return ((ADRESH<<8)+ADRESL); //Return result
+    ADCON0 &= 0x81;                 //Clearing channel selection bits
+    ADCON0 |= channel << 3;         //Setting channel selection bits
+    delay(2000);                    //Acquisition time to charge hold capacitor
+    GO_nDONE = 1;                   //Initializes A/D conversion
+    while(GO_nDONE);                //Waiting for conversion to complete
+    return ((ADRESH<<8)+ADRESL);    //Return result
 }
 
 void address_select(unsigned int n) {
@@ -418,6 +263,7 @@ void address_select(unsigned int n) {
         delay(1000);
         return;
 }
+
 void delay(int s) {
     int a = 0;
     int i;
@@ -504,37 +350,36 @@ void test_spi() {
     //write TX_ADDRESS register
     SPI_CSN = 0;            //CSN low
     data[0] = spi_Send_Read(0xAF);
-//    unsigned char portc_bit4 = PORTBbits.RB2; //spi_Send_Read(0xAF);
-//    //delay(1000);
-//    data[1] = spi_Send_Read(0xAF);
-//    //delay(1000);
-//    data[2] = spi_Send_Read(0xAF);
-//    //delay(1000);
-//    data[3] = spi_Send_Read(0xAF);
-//    //delay(1000);
-//    data[4] = spi_Send_Read(0xAF);
-//    //delay(1000);
-//    data[5] = spi_Send_Read(0xAF);
+    unsigned char portc_bit4 = PORTBbits.RB2; //spi_Send_Read(0xAF);
+    delay(1000);
+    data[1] = spi_Send_Read(0xAF);
+    delay(1000);
+    data[2] = spi_Send_Read(0xAF);
+    delay(1000);
+    data[3] = spi_Send_Read(0xAF);
+    delay(1000);
+    data[4] = spi_Send_Read(0xAF);
+    delay(1000);
+    data[5] = spi_Send_Read(0xAF);
     SPI_CSN = 1;            //CSN high
-    //printf("%d", PORTBbits.RB2);
     
     //delay(1000);
  
     //read TX_ADDRESS register
     //Check that values are correct using the MPLAB debugger
-//    SPI_CSN = 0;                      //CSN low
-//    status = spi_Send_Read(0x10);
-//    delay(1000);
-//    data[0] = spi_Send_Read(0x00);    // 0x11
-//    delay(1000);
-//    data[1] = spi_Send_Read(0x00);    // 0x22
-//    delay(1000);
-//    data[2] = spi_Send_Read(0x00);    // 0x33
-//    delay(1000);
-//    data[3] = spi_Send_Read(0x00);    // 0x44
-//    delay(1000);
-//    data[4] = spi_Send_Read(0x00);    // 0x55
-//    SPI_CSN = 1;                      // CSN high
+    SPI_CSN = 0;                      //CSN low
+    status = spi_Send_Read(0x10);
+    delay(1000);
+    data[0] = spi_Send_Read(0x00);    // 0x11
+    delay(1000);
+    data[1] = spi_Send_Read(0x00);    // 0x22
+    delay(1000);
+    data[2] = spi_Send_Read(0x00);    // 0x33
+    delay(1000);
+    data[3] = spi_Send_Read(0x00);    // 0x44
+    delay(1000);
+    data[4] = spi_Send_Read(0x00);    // 0x55
+    SPI_CSN = 1;                      // CSN high
 }
 
 unsigned int get_data_p2s_register() {
