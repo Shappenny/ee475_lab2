@@ -263,20 +263,42 @@ void main(void)
     int data = sram_read(0x02);
     ADC_init();
     
-    for (int i = 0; i < 1024; i++) {
-        
-    }
-    
     
     
     while(1)
     {
+//        int a = sample_adc(11);
+//        sram_write(a)
+//        SPI_CSN = 0;
+//        spi_Send_Read(a);
+//        SPI_CSN = 1;
+//        delay(10000);
+        
+        for (int i = 0; i < 1024; i++) {
         int a = sample_adc(11);
-        sram_write(a)
+        sram_write(a, i);
+        if (i == 820) {
+            // do something
+        }
+        
+        if (i == 922) {
+            // do somethig else
+        }
+        
+    }
+    // Get permission from surface
+    SPI_CSN = 0;
+    spi_Send_Read(0x1);
+    SPI_CSN = 1;
+    
+    for (int i = 0; i < 1024; i++) {
+        int data = sram_read(i);
         SPI_CSN = 0;
-        spi_Send_Read(a);
+        spi_Send_Read(data);
         SPI_CSN = 1;
         delay(10000);
+    }
+        
         //test_spi();
         //delay(10000);
 //        while(1)
