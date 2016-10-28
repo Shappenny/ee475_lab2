@@ -119,8 +119,9 @@ void main(void)
        
     while(1)
     {
+        int a;
         for (int i = 0; i < 1024; i++) {
-            int a = sample_adc(11);
+            a = sample_adc(11);
             sram_write(a, i * activeBufferId);
             // Buffer 80% full; request upload
             if (i == 820) 
@@ -143,26 +144,25 @@ void main(void)
                 // Switch buffer
                 activeBufferId = (activeBufferId == 2) ? 1 : 2;
             }
-            
         }
         
-        // Upload to surface ship, if we have permission
-        if (canSend)
-        {
-            // Send synchronization sequence
-            SPI_CSN = 0;
-            spi_Send_Read(SYNC_SEQ >> 8);
-            spi_Send_Read(SYNC_SEQ);
-            SPI_CSN = 1;
-            for (int i = 0; i < 1024; i++) {
-                int data = sram_read(i);
-                delay(100);
-                SPI_CSN = 0;
-                spi_Send_Read(data);
-                SPI_CSN = 1;
-                //delay(1000);
-            }
-        }
+//        // Upload to surface ship, if we have permission
+//        if (canSend)
+//        {
+//            // Send synchronization sequence
+//            SPI_CSN = 0;
+//            spi_Send_Read(SYNC_SEQ >> 8);
+//            spi_Send_Read(SYNC_SEQ);
+//            SPI_CSN = 1;
+//            for (int i = 0; i < 1024; i++) {
+//                int data = sram_read(i);
+//                //delay(100);
+//                SPI_CSN = 0;
+//                spi_Send_Read(data);
+//                SPI_CSN = 1;
+//                //delay(1000);
+//            }
+//        }
         
         //test_spi();
         //delay(10000);
@@ -250,7 +250,27 @@ void ADC_init()
 int sample_adc(unsigned char channel) {
     ADCON0 &= 0x81;                 //Clearing channel selection bits
     ADCON0 |= channel << 3;         //Setting channel selection bits
-    delay(2000);                    //Acquisition time to charge hold capacitor
+    // Upload to surface ship, if we have permission
+    //  while we wait for the ADC reading
+    if (canSend)
+    {
+        // Send synchronization sequence
+        SPI_CSN = 0;
+        spi_Send_Read(SYNC_SEQ >> 8);
+        spi_Send_Read(SYNC_SEQ);
+        SPI_CSN = 1;
+        unsigned char data;
+        for (int i = 0; i < 1024; i++) {
+            data = sram_read(i * activeBufferId);
+            //delay(100);
+            SPI_CSN = 0;
+            spi_Send_Read(data);
+            SPI_CSN = 1;
+            //delay(1000);
+        }
+    } else {
+        delay(2000);                    //Acquisition time to charge hold capacitor
+    }
     GO_nDONE = 1;                   //Initializes A/D conversion
     while(GO_nDONE);                //Waiting for conversion to complete
     return ((ADRESH<<8)+ADRESL);    //Return result

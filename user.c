@@ -95,7 +95,6 @@ void SpiWrite(unsigned char byte)
 unsigned char spi_Send_Read(unsigned char byte)
 {
     SSP2BUF = byte;
-    while (!SSP2STATbits.BF);//(!PIR1bits.SSP1IF);
-    //PIR1bits.SSP1IF = 0; 
+    while (!SSP2STATbits.BF);
     return SSP2BUF;
 }
