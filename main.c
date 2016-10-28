@@ -151,6 +151,7 @@
 /* i.e. uint8_t <variable_name>; */
 extern unsigned char master = 1;
 extern unsigned char canSend = 0;
+unsigned char activeBufferId = 1;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -274,7 +275,7 @@ void main(void)
         
     for (int i = 0; i < 1024; i++) {
         int a = sample_adc(11);
-        sram_write(a, i);
+        sram_write(a, i * activeBufferId);
         // Buffer 80% full; request upload
         if (i == 820) 
         {
@@ -284,7 +285,7 @@ void main(void)
             spi_Send_Read(UPLOAD_REQ1);
             SPI_CSN = 1;
             // Wait for response
-            delay(1000);
+            delay(100);
             SPI_CSN = 0;
             unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
             unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
@@ -293,21 +294,27 @@ void main(void)
         // Buffer 90% full; start collection on second buffer
         } else if (i == 922) 
         {
-            // TODO
+            // Switch buffer
+            activeBufferId = (activeBufferId == 2) ? 1 : 2;
         }
         
     }
     
+    // Upload to surface ship, if we have permission
     if (canSend)
     {
-        // Upload to surface ship, if we have permission
+        // Send synchronization sequence
+        SPI_CSN = 0;
+        spi_Send_Read(SYNC_SEQ >> 8);
+        spi_Send_Read(SYNC_SEQ);
+        SPI_CSN = 1;
         for (int i = 0; i < 1024; i++) {
             int data = sram_read(i);
-            delay(1000);
+            delay(100);
             SPI_CSN = 0;
             spi_Send_Read(data);
             SPI_CSN = 1;
-            delay(1000);
+            //delay(1000);
         }
     }
         
