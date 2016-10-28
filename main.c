@@ -167,6 +167,8 @@ void set_s2p_shift_register(unsigned int data);
 void toggle_buffer_clock();
 unsigned int get_data_p2s_register();
 unsigned char spi_Send_Read(unsigned char byte);
+void ADC_init();
+int sample_adc(unsigned char channel);
 unsigned char PORTA_shadow;
 unsigned char PORTB_shadow;
 unsigned char PORTC_shadow;
@@ -181,8 +183,10 @@ void main(void)
     TRISC = 0x10;
     TRISA = 0x10;
     
-    ANSELB = 0x10;
-   
+    ANSELB = 0x00;
+    // Set ADC
+    ANSELBbits.ANSB4 = 1;
+
     PORTA_shadow = 0x00 | (1 << 5);
     PORTB_shadow = 0x00;
     PORTC_shadow = 0x00;
@@ -194,8 +198,10 @@ void main(void)
     
     SPI1_Init();
     SPI1_Enable();
+    
+    
 
-//
+    //
 //
 //    //OpenSPI(SPI_FOSC_16, MODE_00, SMPMID); //open SPI1
 //    PORTA = 0x00;
@@ -255,11 +261,13 @@ void main(void)
     sram_read(0x00);
     sram_read(0x01);
     int data = sram_read(0x02);
+    ADC_init();
+    
     while(1)
     {
-
+        int a = sample_adc(11);
         SPI_CSN = 0;
-        spi_Send_Read(data);
+        spi_Send_Read(a);
         SPI_CSN = 1;
         delay(10000);
         //test_spi();
@@ -335,6 +343,24 @@ void main(void)
 //    }
 
 
+}
+
+void ADC_init()
+{
+    ADCON0 = 0x2d;             
+    ADCON1 = 0x00; 
+    ADCON2 = 0x00;
+    ADFM = 1;
+}
+
+
+int sample_adc(unsigned char channel) {
+    //ADCON0 &= 0x81;              //Clearing channel selection bits
+    //ADCON0 |= channel << 3;        //Setting channel selection bits
+    delay(200000);             //Acquisition time to charge hold capacitor
+    GO_nDONE = 1;                //Initializes A/D conversion
+    while(GO_nDONE);             //Waiting for conversion to complete
+    return ((ADRESH<<8)+ADRESL); //Return result
 }
 
 void address_select(unsigned int n) {
