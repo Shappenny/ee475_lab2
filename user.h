@@ -89,6 +89,10 @@
 //#define   BP1           3              // block protection bit status
 
 /* TODO Application specific user parameters used in user.c may go here */
+#define UPLOAD_REQ0 0xAB
+#define UPLOAD_REQ1 0xCD
+#define UPLOAD_ACK0	0xEF
+#define UPLOAD_ACK1 0x01
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */

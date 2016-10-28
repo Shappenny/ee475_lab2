@@ -262,9 +262,7 @@ void main(void)
     sram_read(0x01);
     int data = sram_read(0x02);
     ADC_init();
-    
-    
-    
+       
     while(1)
     {
 //        int a = sample_adc(11);
@@ -274,29 +272,43 @@ void main(void)
 //        SPI_CSN = 1;
 //        delay(10000);
         
-        for (int i = 0; i < 1024; i++) {
+    for (int i = 0; i < 1024; i++) {
         int a = sample_adc(11);
         sram_write(a, i);
-        if (i == 820) {
-            // do something
-        }
-        
-        if (i == 922) {
-            // do somethig else
+        // Buffer 80% full; request upload
+        if (i == 820) 
+        {
+            // Ask permission from surface
+            SPI_CSN = 0;
+            spi_Send_Read(UPLOAD_REQ0);
+            spi_Send_Read(UPLOAD_REQ1);
+            SPI_CSN = 1;
+            // Wait for response
+            delay(1000);
+            SPI_CSN = 0;
+            unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
+            unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+            SPI_CSN = 1;
+            canSend = (ack0 == UPLOAD_REQ0) && (ack1 == UPLOAD_ACK1);
+        // Buffer 90% full; start collection on second buffer
+        } else if (i == 922) 
+        {
+            // TODO
         }
         
     }
-    // Get permission from surface
-    SPI_CSN = 0;
-    spi_Send_Read(0x1);
-    SPI_CSN = 1;
     
-    for (int i = 0; i < 1024; i++) {
-        int data = sram_read(i);
-        SPI_CSN = 0;
-        spi_Send_Read(data);
-        SPI_CSN = 1;
-        delay(10000);
+    if (canSend)
+    {
+        // Upload to surface ship, if we have permission
+        for (int i = 0; i < 1024; i++) {
+            int data = sram_read(i);
+            delay(1000);
+            SPI_CSN = 0;
+            spi_Send_Read(data);
+            SPI_CSN = 1;
+            delay(1000);
+        }
     }
         
         //test_spi();
@@ -386,7 +398,7 @@ void ADC_init()
 int sample_adc(unsigned char channel) {
     //ADCON0 &= 0x81;              //Clearing channel selection bits
     //ADCON0 |= channel << 3;        //Setting channel selection bits
-    delay(200000);             //Acquisition time to charge hold capacitor
+    delay(2000);             //Acquisition time to charge hold capacitor
     GO_nDONE = 1;                //Initializes A/D conversion
     while(GO_nDONE);             //Waiting for conversion to complete
     return ((ADRESH<<8)+ADRESL); //Return result
