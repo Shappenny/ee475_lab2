@@ -6,23 +6,23 @@
 #define nop() 		_asm nop _endasm	/* no-op */
 #define NULL		0x00
 /* SPI */
-#define SPI_SCK		LATCbits.LATC3//LATBbits.LATB0		/* Clock pin, PORTB pin 0, PORTC pin 3 */
-#define SPI_SI		LATCbits.LATC4//PORTCbits.RC4//PORTBbits.RB1		/* Serial input pin, PORTB pin 1, PORTC pin 4 */
-#define SPI_SO		LATCbits.LATC5//LATBbits.LATB2		/* Serial output pin, PORTB pin 2, PORTC pin 5 */
-#define SPI_CSN		LATAbits.LATA5//LATBbits.LATB3		/* CSN output pin, PORTB pin 3, PORTC pin 2 */
-#define SPI_CE		LATAbits.LATA6//LATBbits.LATB4		/* CE output pin, PORTB pin 4, PORTC pin 1 */
+#define SPI_SCK		LATBbits.LATB1//LATCbits.LATC3		/* Clock pin, PORTB pin 0, PORTC pin 3 */
+#define SPI_SI		PORTBbits.RB2//LATCbits.LATC4//PORTCbits.RC4//		/* Serial input pin, PORTB pin 1, PORTC pin 4 */
+#define SPI_SO		LATBbits.LATB3//LATCbits.LATC5//		/* Serial output pin, PORTB pin 2, PORTC pin 5 */
+#define SPI_CSN		LATBbits.LATB0//LATAbits.LATA5//		/* CSN output pin, PORTB pin 3, PORTC pin 2 */
+//#define SPI_CE		LATAbits.LATA6//LATBbits.LATB4		/* CE output pin, PORTB pin 4, PORTC pin 1 */
 //#define SPI_IRQ		PORTBbits.RB0		/* IRQ input pin, PORTB pin 0 */
 #define SPI_SCALE	4					/* postscaling of signal */
 #define SYNC_SEQ	0x2C8				/* SPI synchronize sequence sent before data */
 
-// MSSP1: SPI1 (MCP923S17 + LCD / Serial EEPROM ) 
- #define    SPI1_TRIS    TRISCbits 
- #define    SPI1_CLK    RC3     
- #define    SPI1_SDI    RC4 
- #define    SPI1_SDO    RC5 
+//// MSSP1: SPI1 (MCP923S17 + LCD / Serial EEPROM ) 
+// #define    SPI1_TRIS    TRISCbits 
+// #define    SPI1_CLK    RC3     
+// #define    SPI1_SDI    RC4 
+// #define    SPI1_SDO    RC5 
  
  // INIT I/O for MSSP1 SPI bus, includes I/O for attached devices 
- #define    INIT_SPI1_IO()    {SPI_SCK=0; SPI_SO=0; SPI_SI=1;} 
+// #define    INIT_SPI1_IO()    {SPI_SCK=0; SPI_SO=0; SPI_SI=1;} 
  
  // ------------------ 
  // SPI Configuration 
@@ -30,14 +30,14 @@
  
  // MSSP1: SPI1 Config and control 
  #define    SPI1_CONFIG         0b00000010    // Master, Clock = FOSC/64, Disabled 
- #define    SPI1_Enable()       {}//{SSP1CON1bits.SSPEN=1;} 
- #define    SPI1_Disable()		{SSP1CON1bits.SSPEN=0;} 
+ #define    SPI1_Enable()       {SSP2CON1bits.SSPEN=1;}//{SSP1CON1bits.SSPEN=1;} 
+ #define    SPI1_Disable()		{SSP2CON1bits.SSPEN=0;} 
  // SPI1 interrupt control 
  #define SPI1_IntEnable()		{PIR1bits.SSP1IF = 0; PIE1bits.SSP1IE=1; INTCONbits.PEIE = 1;} 
  #define SPI1_IntDisable()    	{PIE1bits.SSP1IE=0;} 
  
  // Init MSSP1 in SPI mode and I/O pins 
- #define    SPI1_Init()            {SSPSTAT =0x40; SSPCON1=0x22;}//INIT_SPI1_IO(); SSP1CON1 = SPI1_CONFIG; SSP1STATbits.CKE=1; PIR1bits.SSP1IF=0;} 
+ #define    SPI1_Init()            {SSP2STAT =0x40; SSP2CON1=SPI1_CONFIG;}//INIT_SPI1_IO(); SSP1CON1 = SPI1_CONFIG; SSP1STATbits.CKE=1; PIR1bits.SSP1IF=0;} 
 
 
 /* SSPSTAT REGISTER */

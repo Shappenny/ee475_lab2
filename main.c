@@ -176,10 +176,12 @@ void main(void)
     master = 1;
     canSend = 0;
     
-    // Need B1 as input
-    TRISB = 0x00;
+    // Need B2 as input for SPI IN, B4 as pot input
+    TRISB = 0x14;
     TRISC = 0x10;
-    TRISA = 0x00;
+    TRISA = 0x10;
+    
+    ANSELB = 0x10;
    
     PORTA_shadow = 0x00 | (1 << 5);
     PORTB_shadow = 0x00;
@@ -245,21 +247,34 @@ void main(void)
     
     /* Run... forever!!! */
     unsigned int i = 0;
+    sram_write(0xaf, 0x00);
+    sram_write(0x44, 0x01);
+    sram_write(0xad, 0x02);
+
+
+    sram_read(0x00);
+    sram_read(0x01);
+    int data = sram_read(0x02);
     while(1)
     {
-        /*
-        sram_write(0xaf, 0x00);
-        sram_write(0x44, 0x01);
-        sram_write(0xad, 0x02);
-        
-        
-        sram_read(0x00);
-        sram_read(0x01);
-        sram_read(0x02);
-        */
-        test_spi();
+
+        SPI_CSN = 0;
+        spi_Send_Read(data);
+        SPI_CSN = 1;
         delay(10000);
+        //test_spi();
+        //delay(10000);
+//        while(1)
+//        {
+//            SPI_CSN = 0;            //CSN low
+//            spi_Send_Read(0xA7);
+//            delay(1000);
+//            SPI_CSN = 1;            //CSN low
+//        }
         
+//        test_spi();
+//        delay(10000);
+//        
         // Get pointer to first task
 //        TCBPtr = taskQueueHead;
 //        
@@ -415,37 +430,37 @@ void test_spi() {
     //write TX_ADDRESS register
     SPI_CSN = 0;            //CSN low
     data[0] = spi_Send_Read(0xAF);
-    unsigned char portc_bit4 = PORTCbits.RC4;//spi_Send_Read(0xAF);
-    delay(1000);
-    data[1] = spi_Send_Read(0xAF);
-    delay(1000);
-    data[2] = spi_Send_Read(0xAF);
-    delay(1000);
-    data[3] = spi_Send_Read(0xAF);
-    delay(1000);
-    data[4] = spi_Send_Read(0xAF);
-    delay(1000);
-    data[5] = spi_Send_Read(0xAF);
+//    unsigned char portc_bit4 = PORTBbits.RB2; //spi_Send_Read(0xAF);
+//    //delay(1000);
+//    data[1] = spi_Send_Read(0xAF);
+//    //delay(1000);
+//    data[2] = spi_Send_Read(0xAF);
+//    //delay(1000);
+//    data[3] = spi_Send_Read(0xAF);
+//    //delay(1000);
+//    data[4] = spi_Send_Read(0xAF);
+//    //delay(1000);
+//    data[5] = spi_Send_Read(0xAF);
     SPI_CSN = 1;            //CSN high
-    printf("%d", PORTCbits.RC4);
+    //printf("%d", PORTBbits.RB2);
     
-    delay(1000);
+    //delay(1000);
  
     //read TX_ADDRESS register
     //Check that values are correct using the MPLAB debugger
-    SPI_CSN = 0;                      //CSN low
-    status = spi_Send_Read(0x10);
-    delay(1000);
-    data[0] = spi_Send_Read(0x00);    // 0x11
-    delay(1000);
-    data[1] = spi_Send_Read(0x00);    // 0x22
-    delay(1000);
-    data[2] = spi_Send_Read(0x00);    // 0x33
-    delay(1000);
-    data[3] = spi_Send_Read(0x00);    // 0x44
-    delay(1000);
-    data[4] = spi_Send_Read(0x00);    // 0x55
-    SPI_CSN = 1;                      // CSN high
+//    SPI_CSN = 0;                      //CSN low
+//    status = spi_Send_Read(0x10);
+//    delay(1000);
+//    data[0] = spi_Send_Read(0x00);    // 0x11
+//    delay(1000);
+//    data[1] = spi_Send_Read(0x00);    // 0x22
+//    delay(1000);
+//    data[2] = spi_Send_Read(0x00);    // 0x33
+//    delay(1000);
+//    data[3] = spi_Send_Read(0x00);    // 0x44
+//    delay(1000);
+//    data[4] = spi_Send_Read(0x00);    // 0x55
+//    SPI_CSN = 1;                      // CSN high
 }
 
 unsigned int get_data_p2s_register() {
@@ -454,22 +469,21 @@ unsigned int get_data_p2s_register() {
     PORTA = PORTA_shadow;
     delay(1000);
     // PL = 0
-    PORTA_shadow = PORTA_shadow & ~(1 << 5);
+    PORTA_shadow = PORTA_shadow & ~(1 << 6);
     PORTA = PORTA_shadow;
     delay(1000);
     // PL = 1;
-    PORTA_shadow = PORTA_shadow | (1 << 5);
+    PORTA_shadow = PORTA_shadow | (1 << 6);
     PORTA = PORTA_shadow;
     delay(1000);
      // oe = 1
     PORTA_shadow = PORTA_shadow | (1 << 3);
     PORTA = PORTA_shadow;
     int i;
-    unsigned int data = 0;
+    unsigned int data = 0x00;// = PORTAbits.RA4;
     for (int i = 0; i < 8; i++) {
+        data = data | (PORTAbits.RA4 << i);
         toggle_buffer_clock();
-        data = data | ((PORTA >> 3) & 1);
-        data = data << 1;
     }
     return data;
     
