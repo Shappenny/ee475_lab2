@@ -263,9 +263,16 @@ void main(void)
     int data = sram_read(0x02);
     ADC_init();
     
+    for (int i = 0; i < 1024; i++) {
+        
+    }
+    
+    
+    
     while(1)
     {
         int a = sample_adc(11);
+        sram_write(a)
         SPI_CSN = 0;
         spi_Send_Read(a);
         SPI_CSN = 1;
