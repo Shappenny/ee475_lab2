@@ -24,12 +24,20 @@
 /******************************************************************************/
 
 /* <Initialize variables in user.h and insert code for user algorithms.> */
-extern unsigned char master;
+unsigned char nextByte;
+unsigned char uploadReq;
 extern unsigned char canSend;
+extern unsigned char DATA_COLLECT;
 
 
 void InitApp(void)
 {
+    /* Define global vars */
+    nextByte = 0;
+    uploadReq = 0;
+    canSend = 0;
+    DATA_COLLECT = 0;
+    
     /* TODO Initialize User Ports/Peripherals/Project here */
 
     /* Setup analog functionality and port direction */
@@ -59,24 +67,17 @@ void ReadSram(void *taskDataPtr)
 void SpiComms(void *taskDataPtr)
 {
 	SpiCommsData *data = (SpiCommsData*) taskDataPtr;
-	// Check if we are the master
-	if (master)
-	{
-		// Check if we have permission to send
-		if (canSend)
-		{
-			// Send synch sequence
-			SpiWrite(SYNC_SEQ);
-			// Send data in 1 byte packets
-			for (uint16_t i = 0; i < data->writeSize; ++i)
-			{
-				SpiWrite((*((unsigned char *) data->writeData) >> (8*i)) & 0xFF);
-			}
-		}
-	} else	// slave
-	{
-
-	}
+    // Check if we have permission to send
+    if (canSend)
+    {
+        // Send synch sequence
+        SpiWrite(SYNC_SEQ);
+        // Send data in 1 byte packets
+        for (uint16_t i = 0; i < data->writeSize; ++i)
+        {
+            SpiWrite((*((unsigned char *) data->writeData) >> (8*i)) & 0xFF);
+        }
+    }
 }
 
 unsigned char SpiRead(void)
@@ -95,6 +96,21 @@ void SpiWrite(unsigned char byte)
 unsigned char spi_Send_Read(unsigned char byte)
 {
     SSP2BUF = byte;
+    while (!SSP2STATbits.BF);
+    char data = SSP2BUF;
+    // Check for commands from the surface ship
+    if (byte == START_RX)
+    {
+        // Send acknowledgement to ship and start data collection
+        nextByte = START_ACK;
+        DATA_COLLECT = 1;
+    } else if (byte == STOP_RX)
+    {
+        // Send acknowledgement to ship and stop data collection
+        nextByte = STOP_ACK;
+        DATA_COLLECT = 0;
+    }
+    SSP2BUF = nextByte;
     while (!SSP2STATbits.BF);
     return SSP2BUF;
 }

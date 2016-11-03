@@ -30,6 +30,7 @@
 extern unsigned char master = 1;
 extern unsigned char canSend = 0;
 unsigned char activeBufferId = 1;
+unsigned char DATA_COLLECT, nextByte;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -75,6 +76,8 @@ void main(void)
 
     //PORTA = 0xFF;
     
+    InitApp();
+    
     SPI1_Init();
     SPI1_Enable();
     
@@ -108,35 +111,39 @@ void main(void)
     
     /* Run... forever!!! */
     ADC_init();
-       
+    int i = 0;
     while(1)
     {
-        unsigned char a;
-        for (int i = 0; i < 1024; i++) {
-            a = sample_adc(11);
-            sram_write(a, i * activeBufferId);
-            // Buffer 80% full; request upload
-            if (i == 820) 
-            {
-                // Ask permission from surface
-                SPI_CSN = 0;
-                spi_Send_Read(UPLOAD_REQ0);
-                spi_Send_Read(UPLOAD_REQ1);
-                SPI_CSN = 1;
-                // Wait for response
-                delay(100);
-                SPI_CSN = 0;
-                unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
-                unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
-                SPI_CSN = 1;
-                canSend = (ack0 == UPLOAD_REQ0) && (ack1 == UPLOAD_ACK1);
-            // Buffer 90% full; start collection on second buffer
-            } else if (i == 922) 
-            {
-                // Switch buffer
-                activeBufferId = (activeBufferId == 2) ? 1 : 2;
-            }
-        }
+        // If we can collect data, do so
+//        if (COLLECT_DATA == 1)
+//        {
+//            unsigned char a;
+//            for (int i = 0; i < 1024; i++) {
+//                a = sample_adc(11);
+//                sram_write(a, i * activeBufferId);
+//                // Buffer 80% full; request upload
+//                if (i == 820) 
+//                {
+//                    // Ask permission from surface
+//                    SPI_CSN = 0;
+//                    spi_Send_Read(UPLOAD_REQ0);
+//                    spi_Send_Read(UPLOAD_REQ1);
+//                    SPI_CSN = 1;
+//                    // Wait for response
+//                    delay(100);
+//                    SPI_CSN = 0;
+//                    unsigned char ack = spi_Send_Read(UPLOAD_REQ0);
+//                    //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+//                    SPI_CSN = 1;
+//                    canSend = (ack == UPLOAD_REQ0);// && (ack1 == UPLOAD_ACK1);
+//                // Buffer 90% full; start collection on second buffer
+//                } else if (i == 922) 
+//                {
+//                    // Switch buffer
+//                    activeBufferId = (activeBufferId == 2) ? 1 : 2;
+//                }
+//            }
+//        }
         
 //        // Upload to surface ship, if we have permission
 //        if (canSend)
@@ -155,6 +162,17 @@ void main(void)
 //                //delay(1000);
 //            }
 //        }
+//        
+        
+        sram_write(i,0x00);
+        delay(200000);
+        i++;
+        
+        
+        
+        
+        
+
         
         //test_spi();
         //delay(10000);
@@ -233,18 +251,18 @@ void main(void)
 
 void ADC_init()
 {
-    ADCON0_SHAD &= 0x81;
-    ADCON0_SHAD |= (0x2D);
-    ADCON0 = ADCON0_SHAD;
-    ADCON1_SHAD &= 0x81;
-    ADCON1_SHAD |= (0x00);
-    ADCON1 = ADCON1_SHAD;
-    ADCON2_SHAD &= 0x81;
-    ADCON2_SHAD |= (0x00);
-    ADCON2 = ADCON2_SHAD;
-    //ADCON0 = 0x2d;             
-    //ADCON1 = 0x00; 
-    //ADCON2 = 0x00;
+//    ADCON0_SHAD &= 0x81;
+//    ADCON0_SHAD |= (0x2D);
+//    ADCON0 = ADCON0_SHAD;
+//    ADCON1_SHAD &= 0x81;
+//    ADCON1_SHAD |= (0x00);
+//    ADCON1 = ADCON1_SHAD;
+//    ADCON2_SHAD &= 0x81;
+//    ADCON2_SHAD |= (0x00);
+//    ADCON2 = ADCON2_SHAD;
+    ADCON0 = 0x59;             
+    ADCON1 = 0x00; 
+    ADCON2 = 0x00;
     ADFM = 1;
 }
 

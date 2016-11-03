@@ -28,10 +28,13 @@
  #define    SPI1_Init()            {SSP2STAT =0x40; SSP2CON1=SPI1_CONFIG;}//INIT_SPI1_IO(); SSP1CON1 = SPI1_CONFIG; SSP1STATbits.CKE=1; PIR1bits.SSP1IF=0;} 
 
 /* TODO Application specific user parameters used in user.c may go here */
-#define UPLOAD_REQ0 0xAB
-#define UPLOAD_REQ1 0xCD
-#define UPLOAD_ACK0	0xEF
-#define UPLOAD_ACK1 0x01
+/* Commands */
+#define START_RX 	0xA2
+#define START_ACK 	0xA3
+#define STOP_RX 	0xB2
+#define STOP_ACK 	0xB3
+#define UPLOAD_REQ 	0xC2
+#define UPLOAD_ACK	0xC3
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */
