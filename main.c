@@ -57,7 +57,7 @@ void main(void)
     master = 1;
     canSend = 0;
     
-    // RA1 = serial in from buffer, RA4 = serial in from SRAM
+    // RA1 = serial in from buffer, RA4 = serial in from SRAM, RA5 = SRAM I/O tri-state buffer
     TRISA = 0x10;
     // Need B2 as input for SPI IN, B4 as pot input
     TRISB = 0x14;
@@ -67,7 +67,7 @@ void main(void)
     // Set ADC
     ANSELBbits.ANSB4 = 1;
 
-    PORTA_shadow = 0x00 | (1 << 5);
+    PORTA_shadow = 0x00;
     PORTB_shadow = 0x00;
     PORTC_shadow = 0x00;
     //PORTA = PORTA_shadow;
@@ -76,10 +76,10 @@ void main(void)
 
     //PORTA = 0xFF;
     
-    InitApp();
+    //InitApp();
     
-    SPI1_Init();
-    SPI1_Enable();
+    //SPI1_Init();
+    //SPI1_Enable();
     
 //    /* Define TCBs */
 //    TCB SpiComsTCB;
@@ -111,12 +111,13 @@ void main(void)
     
     /* Run... forever!!! */
     ADC_init();
-    int i = 0;
+
+    
     while(1)
     {
-        // If we can collect data, do so
-//        if (COLLECT_DATA == 1)
-//        {
+//        // If we can collect data, do so
+////        if (COLLECT_DATA == 1)
+////        {
 //            unsigned char a;
 //            for (int i = 0; i < 1024; i++) {
 //                a = sample_adc(11);
@@ -126,16 +127,15 @@ void main(void)
 //                {
 //                    // Ask permission from surface
 //                    SPI_CSN = 0;
-//                    spi_Send_Read(UPLOAD_REQ0);
-//                    spi_Send_Read(UPLOAD_REQ1);
+//                    spi_Send_Read(UPLOAD_REQ);
 //                    SPI_CSN = 1;
 //                    // Wait for response
 //                    delay(100);
 //                    SPI_CSN = 0;
-//                    unsigned char ack = spi_Send_Read(UPLOAD_REQ0);
+//                    unsigned char ack = spi_Send_Read(UPLOAD_REQ);
 //                    //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
 //                    SPI_CSN = 1;
-//                    canSend = (ack == UPLOAD_REQ0);// && (ack1 == UPLOAD_ACK1);
+//                    canSend = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
 //                // Buffer 90% full; start collection on second buffer
 //                } else if (i == 922) 
 //                {
@@ -143,8 +143,8 @@ void main(void)
 //                    activeBufferId = (activeBufferId == 2) ? 1 : 2;
 //                }
 //            }
-//        }
-        
+////        }
+//        
 //        // Upload to surface ship, if we have permission
 //        if (canSend)
 //        {
@@ -162,107 +162,36 @@ void main(void)
 //                //delay(1000);
 //            }
 //        }
-//        
-        
-        sram_write(i,0x00);
-        delay(200000);
-        i++;
         
         
-        
-        
-        
+        for (int i = 0; i < 128; i++) {
+            sram_write(i, i);
 
+        }
         
-        //test_spi();
-        //delay(10000);
-//        while(1)
-//        {
-//            SPI_CSN = 0;            //CSN low
-//            spi_Send_Read(0xA7);
-//            delay(1000);
-//            SPI_CSN = 1;            //CSN low
-//        }
-        
-//        test_spi();
-//        delay(10000);
-//        
-        // Get pointer to first task
-//        TCBPtr = taskQueueHead;
-//        
-//        // Loop through task queue & perform each task
-//        while (TCBPtr != NULL)
-//        {
-//            TCBPtr->taskPtr( (TCBPtr->taskDataPtr) );
-//            TCBPtr = TCBPtr->next;
-//        }
-        
-//        address_select(0x744);
-//        delay(50000);
-//        address_select(0x0a6);
-//        delay(50000);
-//        address_select(0x124);
-//        delay(50000);
-//        address_select(0x350);
-//        delay(50000);
-//        address_select(0x213);
-//        delay(50000);
-//        address_select(0x52a);
-//        delay(50000);
-//        address_select(0x777);
-//        delay(50000);
-//        i++;
+        for(int i = 0; i < 128; i++) {
+            sram_read(i);
+            //delay(100);
+        }
+      
     }
-
-//    reset_counter();
-//    buffer1_write();
-//    int i = 0;
-//    while(1)
-//    {
-//        PORTA_shadow = PORTA_shadow ^ 1;
-//        PORTA = PORTA_shadow;
-//        delay(1000);
-//        PORTA_shadow = PORTA_shadow ^ 1;
-//        PORTA = PORTA_shadow;
-//        delay(1000);
-//        
-//        
-////        
-////        delay(10000);
-////        PORTB = PORTB & ~0x10;
-////        delay(10000);
-////        
-////        PORTA = i;
-////        //buffer1_write();
-//        i++;
-//        if (i == 1000) {
-//            reset_counter();
-//            buffer1_read();
-//        }
-//        if (i == 2000) {
-//            reset_counter();
-//            buffer1_write();
-//            i = 0;
-//        }
-//    }
-
 
 }
 
 void ADC_init()
 {
-//    ADCON0_SHAD &= 0x81;
-//    ADCON0_SHAD |= (0x2D);
-//    ADCON0 = ADCON0_SHAD;
-//    ADCON1_SHAD &= 0x81;
-//    ADCON1_SHAD |= (0x00);
-//    ADCON1 = ADCON1_SHAD;
-//    ADCON2_SHAD &= 0x81;
-//    ADCON2_SHAD |= (0x00);
-//    ADCON2 = ADCON2_SHAD;
-    ADCON0 = 0x59;             
-    ADCON1 = 0x00; 
-    ADCON2 = 0x00;
+    ADCON0_SHAD &= 0x81;
+    ADCON0_SHAD |= (0x2D);
+    ADCON0 = ADCON0_SHAD;
+    ADCON1_SHAD &= 0x81;
+    ADCON1_SHAD |= (0x00);
+    ADCON1 = ADCON1_SHAD;
+    ADCON2_SHAD &= 0x81;
+    ADCON2_SHAD |= (0x00);
+    ADCON2 = ADCON2_SHAD;
+//    ADCON0 = 0x59;             
+//    ADCON1 = 0x00; 
+//    ADCON2 = 0x00;
     ADFM = 1;
 }
 
@@ -365,9 +294,16 @@ void toggle_buffer_clock() {
     return;
 }
 void sram_write(unsigned int data, unsigned int address) {
+    
     // oe = 1
     PORTA_shadow = PORTA_shadow | (1 << 3);
     PORTA = PORTA_shadow;
+    
+    
+    // buffer en = 0
+    PORTA_shadow = PORTA_shadow & ~(1 << 5);
+    PORTA = PORTA_shadow;
+    
     address_select(address);
     set_s2p_shift_register(data);
     // we = 0
@@ -437,8 +373,8 @@ unsigned char get_data_p2s_register() {
     PORTA = PORTA_shadow;
     delay(1000);
      // oe = 1
-    PORTA_shadow = PORTA_shadow | (1 << 3);
-    PORTA = PORTA_shadow;
+//    PORTA_shadow = PORTA_shadow | (1 << 3);
+//    PORTA = PORTA_shadow;
     int i;
     unsigned char data = 0x00;// = PORTAbits.RA4;
     for (int i = 0; i < 8; i++) {
@@ -454,14 +390,17 @@ unsigned char sram_read(unsigned int address) {
     PORTA = PORTA_shadow;
     address_select(address);
     
+    // buffer en = 1
     
-    // oe = 0
-//    PORTA_shadow = PORTA_shadow & ~(1 << 3);
+    PORTA_shadow = PORTA_shadow | (1 << 5);
+    PORTA = PORTA_shadow;
+    
+//    // s2p buffer input = 0
+//    PORTA_shadow = PORTA_shadow | (1 << 1);
 //    PORTA = PORTA_shadow;
+    
+   
     unsigned char data =  get_data_p2s_register();
-//    // oe = 1
-//    PORTA_shadow = PORTA_shadow | (1 << 3);
-//    PORTA = PORTA_shadow;
     return data;
 
 }

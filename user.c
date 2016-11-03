@@ -105,7 +105,7 @@ unsigned char spi_Send_Read(unsigned char byte)
         nextByte = START_ACK;
         DATA_COLLECT = 1;
     } else if (byte == STOP_RX)
-    {
+    { 
         // Send acknowledgement to ship and stop data collection
         nextByte = STOP_ACK;
         DATA_COLLECT = 0;
