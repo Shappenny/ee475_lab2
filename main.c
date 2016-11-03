@@ -78,8 +78,8 @@ void main(void)
     
     //InitApp();
     
-    //SPI1_Init();
-    //SPI1_Enable();
+    SPI1_Init();
+    SPI1_Enable();
     
 //    /* Define TCBs */
 //    TCB SpiComsTCB;
@@ -115,67 +115,59 @@ void main(void)
     
     while(1)
     {
-//        // If we can collect data, do so
-////        if (COLLECT_DATA == 1)
-////        {
-//            unsigned char a;
-//            for (int i = 0; i < 1024; i++) {
-//                a = sample_adc(11);
-//                sram_write(a, i * activeBufferId);
-//                // Buffer 80% full; request upload
-//                if (i == 820) 
-//                {
-//                    // Ask permission from surface
-//                    SPI_CSN = 0;
-//                    spi_Send_Read(UPLOAD_REQ);
-//                    SPI_CSN = 1;
-//                    // Wait for response
-//                    delay(100);
-//                    SPI_CSN = 0;
-//                    unsigned char ack = spi_Send_Read(UPLOAD_REQ);
-//                    //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
-//                    SPI_CSN = 1;
-//                    canSend = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
-//                // Buffer 90% full; start collection on second buffer
-//                } else if (i == 922) 
-//                {
-//                    // Switch buffer
-//                    activeBufferId = (activeBufferId == 2) ? 1 : 2;
-//                }
-//            }
-////        }
-//        
-//        // Upload to surface ship, if we have permission
-//        if (canSend)
+        // If we can collect data, do so
+//        if (COLLECT_DATA == 1)
 //        {
-//            // Send synchronization sequence
-//            SPI_CSN = 0;
-//            spi_Send_Read(SYNC_SEQ >> 8);
-//            spi_Send_Read(SYNC_SEQ);
-//            SPI_CSN = 1;
-//            for (int i = 0; i < 1024; i++) {
-//                int data = sram_read(i);
-//                //delay(100);
-//                SPI_CSN = 0;
-//                spi_Send_Read(data);
-//                SPI_CSN = 1;
-//                //delay(1000);
-//            }
+            unsigned char a;
+            for (int i = 0; i < 256; i++) {
+                a = sample_adc(11);
+                sram_write(10, i);
+                //sram_write(a, i * activeBufferId);
+                // Buffer 80% full; request upload
+                if (i == 30) //820) 
+                {
+                    // Ask permission from surface
+                    SPI_CSN = 0;
+                    spi_Send_Read(UPLOAD_REQ);
+                    //spi_Send_Read(UPLOAD_REQ1);
+                    SPI_CSN = 1;
+                    // Wait for response
+                    delay(100);
+                    SPI_CSN = 0;
+                    unsigned char ack = spi_Send_Read(UPLOAD_REQ);                    unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
+                    //unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);                    
+                    //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+                    SPI_CSN = 1;
+                    canSend = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
+                // Buffer 90% full; start collection on second buffer
+                } else if (i == 922) 
+                {
+                    // Switch buffer
+                    activeBufferId = (activeBufferId == 2) ? 1 : 2;
+                }
+            }
 //        }
         
-        
-        for (int i = 0; i < 128; i++) {
-            sram_write(i, i);
-
+        // Upload to surface ship, if we have permission
+        if (canSend)
+        {
+            // Send synchronization sequence
+            SPI_CSN = 0;
+            spi_Send_Read(SYNC_SEQ >> 8);
+            delay(10);
+            spi_Send_Read(SYNC_SEQ);
+            SPI_CSN = 1;
+            for (int i = 0; i < 256; i++) {
+                int data = sram_read(i);
+                delay(10);
+                SPI_CSN = 0;
+                spi_Send_Read(data);
+                SPI_CSN = 1;
+                delay(10);
+            }
+            canSend = 0;
         }
-        
-        for(int i = 0; i < 128; i++) {
-            sram_read(i);
-            //delay(100);
-        }
-      
     }
-
 }
 
 void ADC_init()

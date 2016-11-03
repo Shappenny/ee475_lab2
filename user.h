@@ -33,8 +33,12 @@
 #define START_ACK 	0xA3
 #define STOP_RX 	0xB2
 #define STOP_ACK 	0xB3
-#define UPLOAD_REQ 	0xC2
-#define UPLOAD_ACK	0xC3
+#define UPLOAD_REQ0 	0xC2
+#define UPLOAD_ACK0	0xC3
+#define UPLOAD_REQ1 	0xD2
+#define UPLOAD_ACK1	0xD3
+#define UPLOAD_REQ 	0x55  // U
+#define UPLOAD_ACK	0x56  // V
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */

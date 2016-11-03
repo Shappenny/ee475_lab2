@@ -110,7 +110,7 @@ unsigned char spi_Send_Read(unsigned char byte)
         nextByte = STOP_ACK;
         DATA_COLLECT = 0;
     }
-    SSP2BUF = nextByte;
-    while (!SSP2STATbits.BF);
+    //SSP2BUF = nextByte;
+    //while (!SSP2STATbits.BF);
     return SSP2BUF;
 }
