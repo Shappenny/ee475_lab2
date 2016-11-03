@@ -27,7 +27,7 @@
 unsigned char nextByte;
 unsigned char uploadReq;
 extern unsigned char canSend;
-extern unsigned char DATA_COLLECT;
+extern unsigned char collectData;
 
 
 void InitApp(void)
@@ -36,7 +36,7 @@ void InitApp(void)
     nextByte = 0;
     uploadReq = 0;
     canSend = 0;
-    DATA_COLLECT = 0;
+    collectData = 1;
     
     /* TODO Initialize User Ports/Peripherals/Project here */
 
@@ -103,12 +103,12 @@ unsigned char spi_Send_Read(unsigned char byte)
     {
         // Send acknowledgement to ship and start data collection
         nextByte = START_ACK;
-        DATA_COLLECT = 1;
+        collectData = 1;
     } else if (byte == STOP_RX)
     { 
         // Send acknowledgement to ship and stop data collection
         nextByte = STOP_ACK;
-        DATA_COLLECT = 0;
+        collectData = 0;
     }
     //SSP2BUF = nextByte;
     //while (!SSP2STATbits.BF);

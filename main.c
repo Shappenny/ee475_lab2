@@ -27,10 +27,9 @@
 /******************************************************************************/
 
 /* i.e. uint8_t <variable_name>; */
-extern unsigned char master = 1;
 extern unsigned char canSend = 0;
 unsigned char activeBufferId = 1;
-unsigned char DATA_COLLECT, nextByte;
+unsigned char collectData, nextByte;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -54,7 +53,6 @@ unsigned char ADCON0_SHAD, ADCON1_SHAD, ADCON2_SHAD;
 
 void main(void)
 {
-    master = 1;
     canSend = 0;
     
     // RA1 = serial in from buffer, RA4 = serial in from SRAM, RA5 = SRAM I/O tri-state buffer
@@ -76,7 +74,7 @@ void main(void)
 
     //PORTA = 0xFF;
     
-    //InitApp();
+    InitApp();
     
     SPI1_Init();
     SPI1_Enable();
@@ -116,15 +114,15 @@ void main(void)
     while(1)
     {
         // If we can collect data, do so
-//        if (COLLECT_DATA == 1)
-//        {
+        if (collectData == 1)
+        {
             unsigned char a;
-            for (int i = 0; i < 256; i++) {
+            for (int i = 0; i < 1024; i++) {
                 a = sample_adc(11);
-                sram_write(10, i);
+                sram_write(a, i);
                 //sram_write(a, i * activeBufferId);
                 // Buffer 80% full; request upload
-                if (i == 30) //820) 
+                if (i == 820) 
                 {
                     // Ask permission from surface
                     SPI_CSN = 0;
@@ -132,7 +130,7 @@ void main(void)
                     //spi_Send_Read(UPLOAD_REQ1);
                     SPI_CSN = 1;
                     // Wait for response
-                    delay(100);
+                    delay(10);
                     SPI_CSN = 0;
                     unsigned char ack = spi_Send_Read(UPLOAD_REQ);                    unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
                     //unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);                    
@@ -146,7 +144,7 @@ void main(void)
                     activeBufferId = (activeBufferId == 2) ? 1 : 2;
                 }
             }
-//        }
+        }
         
         // Upload to surface ship, if we have permission
         if (canSend)
@@ -157,7 +155,7 @@ void main(void)
             delay(10);
             spi_Send_Read(SYNC_SEQ);
             SPI_CSN = 1;
-            for (int i = 0; i < 256; i++) {
+            for (int i = 0; i < 1024; i++) {
                 int data = sram_read(i);
                 delay(10);
                 SPI_CSN = 0;
