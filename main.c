@@ -275,10 +275,10 @@ void main(void)
         
         // Failure
         if (!isIdle_buff1 & !collectData_buff1 & !isIdle_buff2 & !collectData_buff2) {
-            PORTB_shadow = PORTB_shadow | (1 < 7);
+            PORTB_shadow = PORTB_shadow | (1 << 5);
             PORTB = PORTB_shadow;
         } else {
-            PORTB_shadow = PORTB_shadow & ~(1 < 7);
+            PORTB_shadow = PORTB_shadow & ~(1 << 5);
             PORTB = PORTB_shadow;
         }
 
@@ -336,7 +336,7 @@ unsigned char sample_adc(unsigned char channel) {
 
 void address_select(unsigned int n) {
         PORTC = (n & 0xFF);
-        PORTB_shadow = (PORTB_shadow & (0x1F)) | ((n >> 3) & 0xe0);
+        PORTB_shadow = (PORTB_shadow & (0x1F)) | ((n >> 3) & 0xc0);
         PORTB = PORTB_shadow;
         delay(1000);
         return;
