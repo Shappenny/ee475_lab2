@@ -27,10 +27,14 @@
 /******************************************************************************/
 
 /* i.e. uint8_t <variable_name>; */
-extern unsigned char canSend = 0;
+extern unsigned char canSend_buff1 = 0;
+extern unsigned char canSend_buff2 = 0;
+unsigned char collectData_buff1;
+unsigned char collectData_buff2;
+unsigned char isIdle_buff1;
+unsigned char isIdle_buff2;
 unsigned char activeBufferId = 1;
 unsigned char collectData, nextByte;
-
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
@@ -53,8 +57,10 @@ unsigned char ADCON0_SHAD, ADCON1_SHAD, ADCON2_SHAD;
 
 void main(void)
 {
-    canSend = 0;
-    
+    collectData_buff1 = 1;
+    collectData_buff2 = 0;
+    isIdle_buff1 = 0;
+    isIdle_buff2 = 1;
     // RA1 = serial in from buffer, RA4 = serial in from SRAM, RA5 = SRAM I/O tri-state buffer
     TRISA = 0x10;
     // Need B2 as input for SPI IN, B4 as pot input
@@ -110,44 +116,122 @@ void main(void)
     /* Run... forever!!! */
     ADC_init();
 
-    
+    // buff1 count
+    int i = 0; 
+    // buff2 count
+    int j = 100;
+    unsigned char a;
     while(1)
     {
-        // If we can collect data, do so
-        if (collectData == 1)
-        {
-            unsigned char a;
-            for (int i = 0; i < 1024; i++) {
-                a = sample_adc(11);
-                sram_write(a, i);
-                //sram_write(a, i * activeBufferId);
-                // Buffer 80% full; request upload
-                if (i == 820) 
-                {
-                    // Ask permission from surface
-                    SPI_CSN = 0;
-                    spi_Send_Read(UPLOAD_REQ);
-                    //spi_Send_Read(UPLOAD_REQ1);
-                    SPI_CSN = 1;
-                    // Wait for response
-                    delay(10);
-                    SPI_CSN = 0;
-                    unsigned char ack = spi_Send_Read(UPLOAD_REQ);                    unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
-                    //unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);                    
-                    //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
-                    SPI_CSN = 1;
-                    canSend = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
-                // Buffer 90% full; start collection on second buffer
-                } else if (i == 922) 
-                {
-                    // Switch buffer
-                    activeBufferId = (activeBufferId == 2) ? 1 : 2;
-                }
+        
+        if (collectData_buff1) {
+            a = sample_adc(11);
+            sram_write(a, i);
+            i++;
             }
+        if (i >= 80 && !canSend_buff1) 
+        {
+            // Ask permission from surface
+            SPI_CSN = 0;
+            spi_Send_Read(UPLOAD_REQ);
+            //spi_Send_Read(UPLOAD_REQ1);
+            SPI_CSN = 1;
+            // Wait for response
+            delay(10);
+            SPI_CSN = 0;
+            unsigned char ack = spi_Send_Read(UPLOAD_REQ);                   
+            unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
+            //unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);                    
+            //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+            SPI_CSN = 1;
+            canSend_buff1 = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
+        // Buffer 90% full; start collection on second buffer <-- u sure?
+        }
+        if (i >= 90 && isIdle_buff2) 
+        {
+            // Switch buffer
+            collectData_buff2 = 1;
+            isIdle_buff2 = 0;
+        }
+        if (i >= 100) {
+            collectData_buff1 = 0;
         }
         
+        
+        
+        if (collectData_buff2) {
+            a = sample_adc(11);
+            sram_write(a, j);
+            j++;
+        }
+        if (j >= 180 && !canSend_buff2) 
+        {
+            // Ask permission from surface
+            SPI_CSN = 0;
+            spi_Send_Read(UPLOAD_REQ);
+            //spi_Send_Read(UPLOAD_REQ1);
+            SPI_CSN = 1;
+            // Wait for response
+            delay(10);
+            SPI_CSN = 0;
+            unsigned char ack = spi_Send_Read(UPLOAD_REQ);                   
+            unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
+            //unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);                    
+            //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+            SPI_CSN = 1;
+            canSend_buff2 = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
+        // Buffer 90% full; start collection on second buffer <-- u sure?
+        }
+        if (j >= 190 && isIdle_buff1) 
+        {
+            // Switch buffer
+            collectData_buff1 = 1;
+            isIdle_buff1 = 0;
+        }
+        if (j >= 200) {
+            collectData_buff2 = 0;
+        }
+        
+        
+        
+        // If we can collect data, do so
+//        if (collectData == 1)
+//        {
+//            
+//            for (int i = 0; i < 100; i++) {
+//                //a = sample_adc(11);
+//                //sram_write(a, i);
+//                sram_write(a, i * activeBufferId);
+//                // Buffer 80% full; request upload
+//                if (i >= 80 && !canSend) 
+//                {
+//                    // Ask permission from surface
+//                    SPI_CSN = 0;
+//                    spi_Send_Read(UPLOAD_REQ);
+//                    //spi_Send_Read(UPLOAD_REQ1);
+//                    SPI_CSN = 1;
+//                    // Wait for response
+//                    delay(10);
+//                    SPI_CSN = 0;
+//                    unsigned char ack = spi_Send_Read(UPLOAD_REQ);                   
+//                    unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);
+//                    //unsigned char ack1 = spi_Send_Read(UPLOAD_REQ0);                    
+//                    //unsigned char ack0 = spi_Send_Read(UPLOAD_REQ1);
+//                    SPI_CSN = 1;
+//                    canSend = (ack == UPLOAD_REQ);// && (ack1 == UPLOAD_ACK1);
+//                // Buffer 90% full; start collection on second buffer <-- u sure?
+//                } else if (i == 90) 
+//                {
+//                    // Switch buffer
+//                    //activeBufferId = (activeBufferId == 2) ? 1 : 2;
+//                }
+//            }
+//            //Switch buffer
+//            activeBufferId = (activeBufferId == 2) ? 1 : 2;
+//        }
+        
         // Upload to surface ship, if we have permission
-        if (canSend)
+        if (canSend_buff1)
         {
             // Send synchronization sequence
             SPI_CSN = 0;
@@ -155,16 +239,50 @@ void main(void)
             delay(10);
             spi_Send_Read(SYNC_SEQ);
             SPI_CSN = 1;
-            for (int i = 0; i < 1024; i++) {
-                int data = sram_read(i);
+            for (int k = 0; k < 100; k++) {
+                int data = sram_read(k);
                 delay(10);
                 SPI_CSN = 0;
                 spi_Send_Read(data);
                 SPI_CSN = 1;
                 delay(10);
             }
-            canSend = 0;
+            canSend_buff1 = 0;
+            isIdle_buff1 = 1;
+            i = 0;
         }
+        
+        if (canSend_buff2)
+        {
+            // Send synchronization sequence
+            SPI_CSN = 0;
+            spi_Send_Read(SYNC_SEQ >> 8);
+            delay(10);
+            spi_Send_Read(SYNC_SEQ);
+            SPI_CSN = 1;
+            for (int k = 0; k < 100; k++) {
+                int data = sram_read(k + 100);
+                delay(10);
+                SPI_CSN = 0;
+                spi_Send_Read(data);
+                SPI_CSN = 1;
+                delay(10);
+            }
+            canSend_buff2 = 0;
+            isIdle_buff2 = 1;
+            j = 100;
+        }
+        
+        // Failure
+        if (!isIdle_buff1 & !collectData_buff1 & !isIdle_buff2 & !collectData_buff2) {
+            PORTB_shadow = PORTB_shadow | (1 < 7);
+            PORTB = PORTB_shadow;
+        } else {
+            PORTB_shadow = PORTB_shadow & ~(1 < 7);
+            PORTB = PORTB_shadow;
+        }
+
+
     }
 }
 
@@ -262,14 +380,14 @@ void reset_counter() {
 
 void set_s2p_shift_register(unsigned int data) {
     int i;
-    unsigned char serial_out = 0;
-    int shift = 7;
+    unsigned char serial_out;
+    int shift = 0;
     for (i = 0; i < 8; i++) {
         serial_out = (data >> shift) & 0x1;
         PORTA_shadow = (PORTA_shadow & ~(1 << 1)) | (serial_out << 1);
         PORTA = PORTA_shadow;
         toggle_buffer_clock();
-        shift = shift - 1; 
+        shift = shift + 1; 
     }
     return;
 }

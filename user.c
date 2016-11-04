@@ -26,7 +26,8 @@
 /* <Initialize variables in user.h and insert code for user algorithms.> */
 unsigned char nextByte;
 unsigned char uploadReq;
-extern unsigned char canSend;
+extern unsigned char canSend_buff1;
+extern unsigned char canSend_buff2;
 extern unsigned char collectData;
 
 
@@ -35,7 +36,6 @@ void InitApp(void)
     /* Define global vars */
     nextByte = 0;
     uploadReq = 0;
-    canSend = 0;
     collectData = 1;
     
     /* TODO Initialize User Ports/Peripherals/Project here */
@@ -68,7 +68,7 @@ void SpiComms(void *taskDataPtr)
 {
 	SpiCommsData *data = (SpiCommsData*) taskDataPtr;
     // Check if we have permission to send
-    if (canSend)
+    if (canSend_buff1 || canSend_buff2)
     {
         // Send synch sequence
         SpiWrite(SYNC_SEQ);
